@@ -64,3 +64,12 @@ typedef struct {
 	Measurement uniMed;
 } trainingPlan;
 
+typedef struct {
+	int totalTime, partNum, iteracoes;
+	float med;
+	SportType sport;
+} calcMed;
+
+typedef struct {
+	int numSeguidores[MAX_PART], numSeguir[MAX_PART], partNum;
+} seguidores;

@@ -70,6 +70,33 @@ void startupTrainingType(trainingType** p) {
 	}
 }
 
+// Funçao para inicializar a variavel da estrutura (Seguidores)
+void startupSeguidores(seguidores** s) {
+	int i, j;
+
+	for (i = 0; i < MAX_PART; i++) {
+
+		//iniciar Seguidores
+		(*s)[i].partNum = 0;
+		for (j = 0; j < MAX_PART; j++) {
+			(*s)[i].numSeguidores[j] = 0;
+		}
+		for (j = 0; j < MAX_PART; j++) {
+			(*s)[i].numSeguir[j] = 0;
+		}
+	}
+}
+
+// Funçao para inicializar variável da estrutura (calcMed)
+void startupCalcMed(calcMed* t) {
+	for (int i = 0; i < MAX_PART; i++) {
+		t[i].iteracoes = 0;
+		t[i].med = 0;
+		t[i].partNum = 0;
+		t[i].totalTime = 0;
+	}
+}
+
 // Imprimir um menu para auxiliar a leitura do tipo de atividade
 void printSportType() {
 	printf("##Introduza o numero correspondente ao desporto ##\n");
@@ -395,6 +422,153 @@ void addTrainingPlan(trainingPlan** t, pratData** c) {
 }
 
 
+// Funçao para validar o numero de praticante (retorna 1 se existir e 0 se nao existir)
+int encontraNumero(seguidores*** s, int num) {
+	int ver = 0, i = 0;
+
+	while ((**s)[i].partNum != 0) {
+		if ((**s)[i].partNum == num)
+			ver = 1;
+		i++;
+	}
+	return ver;
+}
+
+
+// Funçao para verificar se um praticante segue outro (retorna 1 se seguir e 0 se nao seguir)
+int verificarsegue(seguidores*** s, int num, int seg) {
+	int ver = 0, i = 0;
+
+	while ((**s)[seg - 1].numSeguidores[i] != 0) {
+		if ((**s)[seg - 1].numSeguidores[i] == num) {
+			ver = 1;
+		}
+		i++;
+	}
+
+	return ver;
+}
+
+
+// Funçao seguir outro praticante
+void addNumSeguidores(seguidores** s) {
+	int i = 0, j = 0, aux, num;
+
+	printf("Indique o seu numero de praticante: ");
+	scanf("%d", &num);
+
+	if (encontraNumero(&s, num) == 1) {
+		printf("Indique o numero do praticante que deseja seguir: ");
+		scanf("%d", &aux);
+		if (verificarsegue(&s, num, aux) == 0 && num != aux) {
+			while ((*s)[num - 1].numSeguir[j] != 0) {
+				j++;
+			}
+			(*s)[num - 1].numSeguir[j] = aux;
+			j = 0;
+			while ((*s)[aux - 1].numSeguidores[j] != 0) {
+				j++;
+			}
+			(*s)[aux - 1].numSeguidores[j] = num;
+		}
+		else {
+			if (num == aux) {
+				printf("Nao e possivel um utilizador seguir-se a si mesmo");
+			}
+			else {
+				printf("Ja esta a seguir esse utilizador\n");
+			}
+		}
+	}
+	else {
+		printf("Nao existe nenhum praticante com esse numero");
+	}
+
+	while ((getchar()) != '\n');		//limpar buffer
+}
+
+
+// Funçao para corrigir os arrays que guardam o numero de seguires e a seguir 
+void corrigeseguidores(seguidores*** s, int num, int num1) {
+	int i = 0, j, counter = 0;
+
+	while (i < MAX_PART) {
+		if ((**s)[num].numSeguidores[i] != 0)
+			counter++;
+		i++;
+	}
+
+	for (i = 0, j = 1; j <= counter; i++, j++) {
+		if ((**s)[num].numSeguidores[i] == 0) {
+			(**s)[num].numSeguidores[i] = (**s)[num].numSeguidores[j];
+			(**s)[num].numSeguidores[j] = 0;
+		}
+	}
+
+	i = 0;
+	counter = 0;
+
+	while (i < MAX_PART) {
+		if ((**s)[num1].numSeguir[i] != 0)
+			counter++;
+		i++;
+	}
+
+	for (i = 0, j = 1; j <= counter; i++, j++) {
+		if ((**s)[num1].numSeguir[i] == 0) {
+			(**s)[num1].numSeguir[i] = (**s)[num1].numSeguir[j];
+			(**s)[num1].numSeguir[j] = 0;
+		}
+	}
+}
+
+
+// Funçao para deixar de seguir praticante
+void rmvNumSeguidores(seguidores** s) {
+	int i = 0, j = 0, aux, num;
+
+	printf("Indique o seu numero de praticante: ");
+	scanf("%d", &num);
+
+	if (encontraNumero(&s, num) == 1) {
+		printf("Indique o numero do praticante que deseja parar de seguir: ");
+		scanf("%d", &aux);
+		if (verificarsegue(&s, num, aux) == 1) {
+			while ((*s)[num - 1].numSeguir[j] != aux) {
+				j++;
+			}
+			(*s)[num - 1].numSeguir[j] = 0;
+			j = 0;
+			while ((*s)[aux - 1].numSeguidores[j] != num) {
+				j++;
+			}
+			(*s)[aux - 1].numSeguidores[j] = 0;
+			corrigeseguidores(&s, aux - 1, num - 1);
+		}
+		else {
+			printf("Ja nao estava a seguir este utilizador\n");
+		}
+	}
+	else {
+		printf("Nao existe nenhum praticante com esse numero");
+	}
+
+	while ((getchar()) != '\n');		//limpar buffer
+}
+
+
+// Funçao para atribuir a identificaçao dos praticantes na estrutura Seguidores
+void atualizarseguidores(seguidores** s, pratData** c) {
+	int i = 0;
+
+	while ((*c)[i].partNum != 0) {
+		if ((*s)[i].partNum == 0) {
+			(*s)[i].partNum = (*c)[i].partNum;
+		}
+		i++;
+	}
+}
+
 
 // Guardar dados da variavel c (partData) no ficheiro "pratData.txt"
 void savePartData(pratData** c) {
@@ -584,14 +758,115 @@ void readTrainingPlan(trainingPlan** t) {
 }
 
 
+// Retorna o numero de seguidores de um Participante
+int numberNumSeguidores(seguidores*** s, int z) {
+	int i = 0;
+
+	while ((**s)[z].numSeguidores[i] != 0) {
+		i++;
+	}
+
+	return i - 1;
+}
+
+
+// Retorna o numero de participante que um participante segue
+int numberNumSeguir(seguidores*** s, int z) {
+	int i = 0;
+
+	while ((**s)[z].numSeguir[i] != 0)
+		i++;
+
+	return i - 1;
+}
+
+
+// Guardar dados da variavel s (seguidores) no ficheiro "seguidores.txt"
+void saveSeguidores(seguidores** s) {
+	FILE* fp;
+	int i = 0, j, aux = 0;
+
+	fp = fopen("Seguidores.txt", "w");
+
+	if (fp != NULL) {
+		while ((*s)[i].partNum != 0) {
+			j = 0;
+			fprintf(fp, "%.4d;", (*s)[i].partNum);
+			while (j < numberNumSeguidores(&s, i)) {
+				fprintf(fp, "%d,", (*s)[i].numSeguidores[j]);
+				j++;
+			}
+			fprintf(fp, "%d;", (*s)[i].numSeguidores[j]);
+			j = 0;
+			while (j < numberNumSeguir(&s, i)) {
+				fprintf(fp, "%d,", (*s)[i].numSeguir[j]);
+				j++;
+			}
+			fprintf(fp, "%d\n", (*s)[i].numSeguir[j]);
+			i++;
+		}
+		fclose(fp);
+	}
+	else {
+		printf("Erro ao abrir o ficheiro");
+	}
+}
+
+
+// Lê dados do ficheiro "seguidores.txt" para a variavel s (seguidores)
+void readSeguidores(seguidores** s) {
+	FILE* fp;
+	char line[1024];
+	char* campo1, * campo2, * campo3, * token;
+	int i = 0, j = 0;
+
+	fp = fopen("Seguidores.txt", "r");
+
+
+	if (fp != NULL) {
+		while (fgets(line, sizeof(line), fp)) {
+
+			campo1 = strtok(line, ";");
+			campo2 = strtok(NULL, ";");
+			campo3 = strtok(NULL, ";");
+
+			(*s)[i].partNum = atoi(campo1);
+
+			token = campo2;
+			campo2 = strtok(token, ",");
+			j = 0;
+			while (campo2 != NULL) {
+				(*s)[i].numSeguidores[j] = atoi(campo2);
+				campo2 = strtok(NULL, ",");
+				j++;
+			}
+
+			token = campo3;
+			campo3 = strtok(token, ",");
+			j = 0;
+			while (campo3 != NULL) {
+				(*s)[i].numSeguir[j] = atoi(campo3);
+				campo3 = strtok(NULL, ",");
+				j++;
+			}
+			i++;
+		}
+		fclose(fp);
+	}
+	else {
+		printf("Erro ao abrir o ficheiro");
+	}
+}
+
+
 
 
 int main() {
+
 	pratData c[MAX_PART];
 	trainingType p[MAX_PART], z[MAX_PART];
 	trainingPlan t[MAX_PART], a[MAX_PART];
 	seguidores s[MAX_PART];
-
 
 	return 0;
 }
