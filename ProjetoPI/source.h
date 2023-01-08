@@ -6,7 +6,7 @@
 const char* SPORT_NAME[] = { "marcha","windsurfing","btt", "swimming" };
 const char* UNI_MED[] = { "m","km","mn" };
 
-// Array de apoio a verificaçao de dias dos meses
+// Array de apoio a verificaÃ§ao de dias dos meses
 int MAX_DAYS[12] = { 31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31 };
 
 

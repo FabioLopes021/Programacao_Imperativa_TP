@@ -1330,7 +1330,182 @@ void pergunta7(trainingType** p) {
 }
 
 
+// A funçao "auxpergunta8" serve de auxilio a funçao "Pergunta8", a mesma edita os dados de dois arrays com os indices necessarios para imprimir a informaçao correta
+void auxpergunta8(trainingPlan*** t, trainingType*** p, int* savetp, int* save, int x) {
+	int i, j;
+
+	for (i = 0; i < 30; i++) {
+		savetp[i] = -1;
+		save[i] = -1;
+	}
+
+	for (i = 0, j = 0; (**t)[i].partNum != 0; i++) {
+		if ((**t)[i].partNum == x) {
+			savetp[j] = i;
+			j++;
+		}
+	}
+
+	for (i = 0, j = 0; (**p)[i].partNum != 0; i++) {
+		if ((**p)[i].partNum == x) {
+			save[j] = i;
+			j++;
+		}
+	}
+}
+
+// A funçao "pergunta8" Gera uma tabela das atividades planeadas e realizadas para todos os praticantes
+void pergunta8(trainingType** p, trainingPlan** t, pratData** c) {
+	int i, z, j = 0, d, savetp[30], save[30], auxd, auxz;
+
+	printf("-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------\n");
+	printf("|Num. Prat | Nome\t\t | Ativ. Planeada | Medida | Valor da medida | Data de Inicio\t | Data de Fim\t | Ativ. realizada | Data de Inicio | Duracao | Medida | Valor da medida|\n");
+	for (i = 0; (*c)[i].partNum != 0; i++) {
+		z = 0;
+		d = 0;
+		auxpergunta8(&t, &p, &savetp, &save, (*c)[i].partNum);
+		while (savetp[z] != -1)
+			z++;
+		while (save[d] != -1)
+			d++;
+		z--;
+		d--;
+		while (z > d) {
+			auxz = savetp[z];
+			// imprime a tabela so com o training plan ate poder igualar
+			printf("| %-8.4d | %-19s | %-15s| %-7s| %-15d |", (*c)[i].partNum, (*c)[i].name, SPORT_NAME[(*t)[auxz].sport], UNI_MED[(*t)[auxz].uniMed], (*t)[auxz].distance);
+			printf(" %.2d/%.2d/%-11.4d | %.2d/%.2d/%-7.4d |", (*t)[auxz].initDate.dia, (*t)[auxz].initDate.mes, (*t)[auxz].initDate.ano, (*t)[auxz].endDate.dia, (*t)[auxz].endDate.mes, (*t)[auxz].endDate.ano);
+			printf(" --------------- | -------------- |");
+			printf(" ------- | ------ | -------------- |\n");
+			z--;
+		}
+		while (z < d) {
+			auxd = save[d];
+			// imprime a tabela so com o training type ate poder igualar
+			printf("| %-8.4d | %-19s | -------------- | ------ | --------------- |", (*c)[i].partNum, (*c)[i].name);
+			printf(" ----------------- | ------------- |");
+			printf(" %-15s | %.2d/%.2d/%-8.4d |", SPORT_NAME[(*p)[auxd].sport], (*p)[auxd].data.dia, (*p)[auxd].data.mes, (*p)[auxd].data.ano);
+			printf(" %-7d | %-6s | %-14d |\n", (*p)[auxd].duration, UNI_MED[(*p)[auxd].uniMed], (*p)[auxd].distance);
+			d--;
+		}
+		while (z == d && z >= 0) {
+			// imprime a tabela com a linha completas
+			auxz = savetp[z];
+			auxd = save[d];
+			printf("| %-8.4d | %-19s | %-15s| %-7s| %-15d |", (*c)[i].partNum, (*c)[i].name, SPORT_NAME[(*t)[auxz].sport], UNI_MED[(*t)[auxz].uniMed], (*t)[auxz].distance);
+			printf(" %.2d/%.2d/%-11.4d | %.2d/%.2d/%-7.4d |", (*t)[auxz].initDate.dia, (*t)[auxz].initDate.mes, (*t)[auxz].initDate.ano, (*t)[auxz].endDate.dia, (*t)[auxz].endDate.mes, (*t)[auxz].endDate.ano);
+			printf(" %-15s | %.2d/%.2d/%-8.4d |", SPORT_NAME[(*p)[auxd].sport], (*p)[auxd].data.dia, (*p)[auxd].data.mes, (*p)[auxd].data.ano);
+			printf(" %-7d | %-6s | %-14d |\n", (*p)[auxd].duration, UNI_MED[(*p)[auxd].uniMed], (*p)[auxd].distance);
+			z--;
+			d--;
+		}
+	}
+	printf("-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------\n");
+}
+
+
+// A funçao "pergunta10" apresenta uma listagem por atividade com o praticante com o maior tempo de prática dessa atividade, e o respetivo tempo, de entre os seguidores de um praticante definido pelo utilizador
+void pergunta10(pratData** c, seguidores** s, trainingType** p) {
+	int i, j, num, time, bestTime = 0, savenum = 0;
+	int save[100] = { 0 };
+
+	SportType x;
+
+	printf("Indique o Numero do praticante: ");
+	scanf("%d", &num);
+	while (validarNum(&c, num) == 0) {
+		printf("Indique um numero de praticante valido: ");
+		scanf("%d", &num);
+	}
+
+	num -= 1;
+
+	for (i = 0; (*s)[num].numSeguidores[i] != 0; i++) {
+		save[i] = (*s)[num].numSeguidores[i];
+	}
+
+	for (x = 0; x < 4; x++) {
+		bestTime = 0;
+		for (i = 0; save[i] != 0; i++) {
+			time = 0;
+			for (j = 0; (*p)[j].partNum != 0; j++) {
+				if ((save[i] == (*p)[j].partNum) && ((*p)[j].sport == x)) {
+					time += (*p)[j].duration;
+				}
+			}
+			if (time > bestTime) {
+				bestTime = time;
+				savenum = save[i];
+			}
+		}
+		if (bestTime != 0) {
+			printf("\n-------------------------------------\n");
+			printf("Dos seguidores do praticante N %d \n", (*p)[num].partNum);
+			printf("O praticante N %d e o que aprensenta mais tempo praticado com %d minutos de %s", savenum, bestTime, SPORT_NAME[x]);
+			printf("\n-------------------------------------\n");
+		}
+		else {
+			printf("\n-------------------------------------\n");
+			printf("Dos praticantes a seguir o praticante N %d nenhum praticou a atividade %s", (*p)[num].partNum, SPORT_NAME[x]);
+			printf("\n-------------------------------------\n");
+		}
+	}
+}
+
+
+
+// A funçao "pergunta11" Apresenta uma listagem por atividade com o praticante com o maior tempo de prática dessa atividade, e o respetivo tempo, de entre os praticantes seguidos por um determinado praticantedefinido pelo utilizador
+void pergunta11(pratData** c, seguidores** s, trainingType** p) {
+	int i, j, num, time, bestTime, savenum = 0;
+	int save[100] = { 0 };
+
+	SportType x;
+
+
+	printf("Indique o Numero do praticante: ");
+	scanf("%d", &num);
+	while (validarNum(&c, num) == 0) {
+		printf("Indique um numero de praticante valido: ");
+		scanf("%d", &num);
+	}
+
+	num -= 1;
+
+	for (i = 0; (*s)[num].numSeguir[i] != 0; i++) {
+		save[i] = (*s)[num].numSeguir[i];
+	}
+
+	for (x = 0; x < 4; x++) {
+		bestTime = 0;
+		for (i = 0; save[i] != 0; i++) {
+			time = 0;
+			for (j = 0; (*p)[j].partNum != 0; j++) {
+				if ((save[i] == (*p)[j].partNum) && ((*p)[j].sport == x)) {
+					time += (*p)[j].duration;
+				}
+			}
+			if (time > bestTime) {
+				bestTime = time;
+				savenum = save[i];
+			}
+		}
+		if (bestTime != 0) {
+			printf("\n-------------------------------------\n");
+			printf("Dos praticante seguidos pelo N %d \n", (*p)[num].partNum);
+			printf("O praticante N %d e o que apresenta mais tempo praticado com %d minutos de %s", savenum, bestTime, SPORT_NAME[x]);
+			printf("\n-------------------------------------\n");
+		}
+		else {
+			printf("\n-------------------------------------\n");
+			printf("Dos praticantes seguidos pelo N %d nenhum praticou a atividade %s", (*p)[num].partNum, SPORT_NAME[x]);
+			printf("\n-------------------------------------\n");
+		}
+	}
+}
+
+
 int main() {
+
 	pratData c[MAX_PART];
 	trainingType p[MAX_PART], z[MAX_PART];
 	trainingPlan t[MAX_PART], a[MAX_PART];
