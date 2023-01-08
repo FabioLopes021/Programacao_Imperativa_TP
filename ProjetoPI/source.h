@@ -63,3 +63,4 @@ typedef struct {
 	SportType sport;
 	Measurement uniMed;
 } trainingPlan;
+

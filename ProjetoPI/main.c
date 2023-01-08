@@ -8,8 +8,67 @@
 #include "Source.c"
 #include <windows.h>
 
+// funçao para inicializar as variáveis das estrutura (pratData, trainingType e trainingPlan)
+void startup(pratData** c, trainingType** p, trainingPlan** t) {
+	int i;
+
+	for (i = 0; i < MAX_PART; i++) {
+
+		// iniciar partData
+
+		(*c)[i].partNum = 0;
+		strcpy((*c)[i].name, "");
+		(*c)[i].tel = 0;
+		(*c)[i].age = 0;
+
+		//iniciar trainingType
+		(*p)[i].partNum = 0;
+		(*p)[i].data.ano = 0; (*p)[i].data.mes = 0; (*p)[i].data.dia = 0;
+		(*p)[i].hora.hora = 0; (*p)[i].hora.minuto = 0;
+		(*p)[i].duration = 0;
+		(*p)[i].distance = 0;
+
+		// iniciar trainingPlan
+		(*t)[i].partNum = 0;
+		(*t)[i].initDate.dia = 0; (*t)[i].initDate.mes = 0; (*t)[i].initDate.ano = 0;
+		(*t)[i].inittime.hora = 0; (*t)[i].inittime.minuto = 0;
+		(*t)[i].endDate.dia = 0; (*t)[i].endDate.mes = 0; (*t)[i].endDate.ano = 0;
+		(*t)[i].endtime.hora = 0; (*t)[i].endtime.minuto = 0;
+		(*t)[i].distance = 0;
+	}
+}
+
+// Funçao para inicializar variável auxiliar
+void startupTrainingPlan(trainingPlan** t) {
+	int i;
+
+	for (i = 0; i < MAX_PART; i++) {
+
+		// iniciar trainingPlan
+		(*t)[i].partNum = 0;
+		(*t)[i].initDate.dia = 0; (*t)[i].initDate.mes = 0; (*t)[i].initDate.ano = 0;
+		(*t)[i].inittime.hora = 0; (*t)[i].inittime.minuto = 0;
+		(*t)[i].endDate.dia = 0; (*t)[i].endDate.mes = 0; (*t)[i].endDate.ano = 0;
+		(*t)[i].endtime.hora = 0; (*t)[i].endtime.minuto = 0;
+		(*t)[i].distance = 0;
+	}
+}
 
 
+// Funçao para inicializar variável da estrutura (trainingType)
+void startupTrainingType(trainingType** p) {
+	int i;
+
+	for (i = 0; i < MAX_PART; i++) {
+
+		//iniciar trainingType
+		(*p)[i].partNum = 0;
+		(*p)[i].data.ano = 0; (*p)[i].data.mes = 0; (*p)[i].data.dia = 0;
+		(*p)[i].hora.hora = 0; (*p)[i].hora.minuto = 0;
+		(*p)[i].duration = 0;
+		(*p)[i].distance = 0;
+	}
+}
 
 // Imprimir um menu para auxiliar a leitura do tipo de atividade
 void printSportType() {
@@ -337,13 +396,202 @@ void addTrainingPlan(trainingPlan** t, pratData** c) {
 
 
 
+// Guardar dados da variavel c (partData) no ficheiro "pratData.txt"
+void savePartData(pratData** c) {
+	FILE* fp;
+	int i = 0;
+
+	fp = fopen("pratData.txt", "w");
+
+	if (fp != NULL) {
+		while ((*c)[i].age != 0) {
+			fprintf(fp, "%.4d;%s;%d;%d\n", (*c)[i].partNum, (*c)[i].name, (*c)[i].tel, (*c)[i].age);
+			i++;
+		}
+		fclose(fp);
+	}
+	else {
+		printf("Erro ao abrir o ficheiro");
+	}
+}
+
+
+// Lê dados do ficheiro "pratData.txt" para a variavel c (partData)
+void readPartData(pratData** c) {
+	FILE* fp;
+	char line[1024];
+	char* campo1, * campo2, * campo3, * campo4;
+	int i = 0;
+
+	fp = fopen("pratData.txt", "r");
+
+
+	if (fp != NULL) {
+		while (fgets(line, sizeof(line), fp)) {
+
+			campo1 = strtok(line, ";");
+			campo2 = strtok(NULL, ";");
+			campo3 = strtok(NULL, ";");
+			campo4 = strtok(NULL, ";");
+
+			(*c)[i].partNum = atoi(campo1);
+			strcpy((*c)[i].name, campo2);
+			(*c)[i].tel = atoi(campo3);
+			(*c)[i].age = atoi(campo4);
+
+			i++;
+		}
+		fclose(fp);
+	}
+	else {
+		printf("Erro ao abrir o ficheiro");
+	}
+}
+
+
+// Guardar dados da variavel p (trainingType) no ficheiro "trainingType.txt"
+void saveTrainingType(trainingType** p) {
+	FILE* fp;
+	int i = 0;
+	fp = fopen("trainingType.txt", "w");
+
+	if (fp != NULL) {
+		while ((*p)[i].partNum != 0) {
+			fprintf(fp, "%.4d;%d;%d;%d;%d;%d;%d;%d;%d;%d\n", (*p)[i].partNum, (*p)[i].data.dia, (*p)[i].data.mes, (*p)[i].data.ano, (*p)[i].hora.hora, (*p)[i].hora.minuto, (*p)[i].sport, (*p)[i].duration, (*p)[i].distance, (*p)[i].uniMed);
+			i++;
+		}
+		fclose(fp);
+	}
+	else {
+		printf("Erro ao abrir o ficheiro");
+	}
+}
+
+
+// Lê dados do ficheiro "trainingType.txt" para a variavel p (trainingType)
+void readTrainingType(trainingType** p) {
+	FILE* fp;
+	char line[1024];
+	char* campo1, * campo2, * campo3, * campo4, * campo5, * campo6, * campo7, * campo8, * campo9, * campo10;
+	int i = 0;
+	fp = fopen("trainingType.txt", "r");
+
+
+	if (fp != NULL) {
+		while (fgets(line, sizeof(line), fp)) {
+
+			campo1 = strtok(line, ";");
+			campo2 = strtok(NULL, ";");
+			campo3 = strtok(NULL, ";");
+			campo4 = strtok(NULL, ";");
+			campo5 = strtok(NULL, ";");
+			campo6 = strtok(NULL, ";");
+			campo7 = strtok(NULL, ";");
+			campo8 = strtok(NULL, ";");
+			campo9 = strtok(NULL, ";");
+			campo10 = strtok(NULL, ";");
+
+			(*p)[i].partNum = atoi(campo1);
+			(*p)[i].data.dia = atoi(campo2);
+			(*p)[i].data.mes = atoi(campo3);
+			(*p)[i].data.ano = atoi(campo4);
+			(*p)[i].hora.hora = atoi(campo5);
+			(*p)[i].hora.minuto = atoi(campo6);
+			(*p)[i].sport = atoi(campo7);
+			(*p)[i].duration = atoi(campo8);
+			(*p)[i].distance = atoi(campo9);
+			(*p)[i].uniMed = atoi(campo10);
+			i++;
+		}
+		fclose(fp);
+	}
+	else {
+		printf("Erro ao abrir o ficheiro");
+	}
+}
+
+
+// Guardar dados da variavel t (trainingPlan) no ficheiro "trainingPlan.txt"
+void saveTrainingPlan(trainingPlan** t) {
+	FILE* fp;
+	int i = 0;
+
+	fp = fopen("trainingPlan.txt", "w");
+
+	if (fp != NULL) {
+		while ((*t)[i].partNum != 0) {
+			fprintf(fp, "%.4d;%d;%d;%d;%d;%d;%d;%d;%d;%d;%d;%d;%d;%d\n", (*t)[i].partNum, (*t)[i].initDate.dia, (*t)[i].initDate.mes, (*t)[i].initDate.ano, (*t)[i].inittime.hora, (*t)[i].inittime.minuto, (*t)[i].endDate.dia, (*t)[i].endDate.mes, (*t)[i].endDate.ano, (*t)[i].endtime.hora, (*t)[i].endtime.minuto, (*t)[i].sport, (*t)[i].distance, (*t)[i].uniMed);
+			i++;
+		}
+		fclose(fp);
+	}
+	else {
+		printf("Erro ao abrir o ficheiro");
+	}
+}
+
+
+// Lê dados do ficheiro "trainingPlan.txt" para a variavel t (trainingType)
+void readTrainingPlan(trainingPlan** t) {
+	FILE* fp;
+	char line[1024];
+	char* campo1, * campo2, * campo3, * campo4, * campo5, * campo6, * campo7, * campo8, * campo9, * campo10, * campo11, * campo12, * campo13, * campo14;
+	int i = 0;
+
+	fp = fopen("trainingPlan.txt", "r");
+
+
+	if (fp != NULL) {
+		while (fgets(line, sizeof(line), fp)) {
+
+			campo1 = strtok(line, ";");
+			campo2 = strtok(NULL, ";");
+			campo3 = strtok(NULL, ";");
+			campo4 = strtok(NULL, ";");
+			campo5 = strtok(NULL, ";");
+			campo6 = strtok(NULL, ";");
+			campo7 = strtok(NULL, ";");
+			campo8 = strtok(NULL, ";");
+			campo9 = strtok(NULL, ";");
+			campo10 = strtok(NULL, ";");
+			campo11 = strtok(NULL, ";");
+			campo12 = strtok(NULL, ";");
+			campo13 = strtok(NULL, ";");
+			campo14 = strtok(NULL, ";");
+
+
+			(*t)[i].partNum = atoi(campo1);
+			(*t)[i].initDate.dia = atoi(campo2);
+			(*t)[i].initDate.mes = atoi(campo3);
+			(*t)[i].initDate.ano = atoi(campo4);
+			(*t)[i].inittime.hora = atoi(campo5);
+			(*t)[i].inittime.minuto = atoi(campo6);
+			(*t)[i].endDate.dia = atoi(campo7);
+			(*t)[i].endDate.mes = atoi(campo8);
+			(*t)[i].endDate.ano = atoi(campo9);
+			(*t)[i].endtime.hora = atoi(campo10);
+			(*t)[i].endtime.minuto = atoi(campo11);
+			(*t)[i].sport = atoi(campo12);
+			(*t)[i].distance = atoi(campo13);
+			(*t)[i].uniMed = atoi(campo14);
+			i++;
+		}
+		fclose(fp);
+	}
+	else {
+		printf("Erro ao abrir o ficheiro");
+	}
+}
+
+
+
 
 int main() {
-
-
 	pratData c[MAX_PART];
 	trainingType p[MAX_PART], z[MAX_PART];
 	trainingPlan t[MAX_PART], a[MAX_PART];
+	seguidores s[MAX_PART];
+
 
 	return 0;
 }
