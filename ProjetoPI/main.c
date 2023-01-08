@@ -8,6 +8,102 @@
 #include "Source.c"
 #include <windows.h>
 
+
+// Definiçao de funçoes
+void wEnter();
+void SetColor(int ForgC);
+void startup(pratData** c, trainingType** p, trainingPlan** t);
+void startupTrainingPlan(trainingPlan** t);
+void startupTrainingType(trainingType** p);
+void startupSeguidores(seguidores** s);
+void startupCalcMed(calcMed* t);
+void printSportType();
+void printMeasurement();
+void printPartData(pratData** c);
+void printTrainingType(trainingType** p);
+void printTrainingPlan(trainingPlan** t);
+void printNumSeg(seguidores** s);
+void addPratData(pratData** c);
+int validarNum(pratData*** c, int num);
+void addTrainingType(trainingType** p, pratData** c);
+void addTrainingPlan(trainingPlan** t, pratData** c);
+int encontraNumero(seguidores*** s, int num);
+int verificarsegue(seguidores*** s, int num, int seg);
+void addNumSeguidores(seguidores** s);
+void corrigeseguidores(seguidores*** s, int num, int num1);
+void rmvNumSeguidores(seguidores** s);
+void atualizarseguidores(seguidores** s, pratData** c);
+void savePartData(pratData** c);
+void readPartData(pratData** c);
+void saveTrainingType(trainingType** p);
+void readTrainingType(trainingType** p);
+void saveTrainingPlan(trainingPlan** t);
+void readTrainingPlan(trainingPlan** t);
+int numberNumSeguidores(seguidores*** s, int z);
+int numberNumSeguir(seguidores*** s, int z);
+void saveSeguidores(seguidores** s);
+void readSeguidores(seguidores** s);
+void dateRangeTrainingType(trainingType** p, trainingType** r);
+void dateRangeTrainingPlan(trainingPlan** p, trainingPlan** r);
+void pergunta4(trainingType** p);
+void pergunta5(trainingType** p);
+void pergunta6(pratData** c, trainingPlan** a);
+void pergunta7(trainingType** p);
+void auxpergunta8(trainingPlan*** t, trainingType*** p, int* savetp, int* save, int x);
+void pergunta8(trainingType** p, trainingPlan** t, pratData** c);
+void pergunta10(pratData** c, seguidores** s, trainingType** p);
+void pergunta11(pratData** c, seguidores** s, trainingType** p);
+char menu();
+int menuAdicionar();
+int menuFuncoes();
+void generico();
+
+
+// Funçao para esperar pelo enter para continuar
+void wEnter() {
+	printf("\nPrima ENTER para continuar..."); getchar();
+}
+
+/*
+Função para alterar a cor da consola
+https://stackoverflow.com/questions/29574849/how-to-change-text-color-and-console-color-in-codeblocks
+Name         | Value
+			 |
+Black        |   0
+Blue         |   1
+Green        |   2
+Cyan         |   3
+Red          |   4
+Magenta      |   5
+Brown        |   6
+Light Gray   |   7
+Dark Gray    |   8
+Light Blue   |   9
+Light Green  |   10
+Light Cyan   |   11
+Light Red    |   12
+Light Magenta|   13
+Yellow       |   14
+White        |   15
+*/
+void SetColor(int ForgC)
+{
+	WORD wColor;
+
+	HANDLE hStdOut = GetStdHandle(STD_OUTPUT_HANDLE);
+	CONSOLE_SCREEN_BUFFER_INFO csbi;
+
+	//We use csbi for the wAttributes word.
+	if (GetConsoleScreenBufferInfo(hStdOut, &csbi))
+	{
+		//Mask out all but the background attribute, and add in the forgournd     color
+		wColor = (csbi.wAttributes & 0xF0) + (ForgC & 0x0F);
+		SetConsoleTextAttribute(hStdOut, wColor);
+	}
+	return;
+}
+
+
 // funçao para inicializar as variáveis das estrutura (pratData, trainingType e trainingPlan)
 void startup(pratData** c, trainingType** p, trainingPlan** t) {
 	int i;
@@ -859,10 +955,382 @@ void readSeguidores(seguidores** s) {
 }
 
 
+// Copia para a variável z (trainingType) os dados da variável p (trainingType) filtrados por data
+void dateRangeTrainingType(trainingType** p, trainingType** r) {
+	int i, count = 0;
+	Date a, z;
+
+
+	printf("Introduza o periodo de tempo que deseja seguir esta atividade (AA/MM/DD) \n");
+	printf("Inicio \n");
+	printf("Ano: ");
+	scanf("%d", &a.ano);
+	printf("Mes: ");
+	scanf("%d", &a.mes);
+	while (a.mes < 1 || a.mes > 12) {
+		printf("Introduza um mes valido: ");
+		scanf("%d", &a.mes);
+	}
+	printf("Dia: ");
+	scanf("%d", &a.dia);
+	while (a.dia < 1 || a.dia > MAX_DAYS[a.mes - 1]) {
+		printf("Introduza um dia valido: ");
+		scanf("%d", &a.dia);
+	}
+
+	printf("Fim \n");
+	printf("Ano: ");
+	scanf("%d", &z.ano);
+	printf("Mes: ");
+	scanf("%d", &z.mes);
+	while (z.mes < 1 || z.mes > 12) {
+		printf("Introduza um mes valido: ");
+		scanf("%d", &z.mes);
+	}
+	printf("Dia: ");
+	scanf("%d", &z.dia);
+	while (z.dia < 1 || z.dia > MAX_DAYS[z.mes - 1]) {
+		printf("Introduza um dia valido: ");
+		scanf("%d", &z.dia);
+	}
+
+
+	for (i = 0; (*p)[i].partNum != 0; i++) {
+		if (((*p)[i].data.ano >= a.ano) && ((*p)[i].data.ano <= z.ano)) {
+			if (((*p)[i].data.ano > a.ano) && ((*p)[i].data.ano < z.ano)) {
+				(*r)[count].partNum = (*p)[i].partNum;
+				(*r)[count].data.ano = (*p)[i].data.ano; (*r)[count].data.mes = (*p)[i].data.mes; (*r)[count].data.dia = (*p)[i].data.dia;
+				(*r)[count].hora.hora = (*p)[i].hora.hora; (*r)[count].hora.minuto = (*p)[i].hora.minuto;
+				(*r)[count].duration = (*p)[i].duration;
+				(*r)[count].distance = (*p)[i].distance;
+				(*r)[count].sport = (*p)[i].sport;
+				(*r)[count].uniMed = (*p)[i].uniMed;
+				count++;
+			}
+			else if ((*p)[i].data.ano == a.ano) {
+				if ((*p)[i].data.mes > a.mes) {
+					(*r)[count].partNum = (*p)[i].partNum;
+					(*r)[count].data.ano = (*p)[i].data.ano; (*r)[count].data.mes = (*p)[i].data.mes; (*r)[count].data.dia = (*p)[i].data.dia;
+					(*r)[count].hora.hora = (*p)[i].hora.hora; (*r)[count].hora.minuto = (*p)[i].hora.minuto;
+					(*r)[count].duration = (*p)[i].duration;
+					(*r)[count].distance = (*p)[i].distance;
+					(*r)[count].sport = (*p)[i].sport;
+					(*r)[count].uniMed = (*p)[i].uniMed;
+					count++;
+				}
+				else if ((*p)[i].data.mes == a.mes && (*p)[i].data.dia >= a.dia) {
+					(*r)[count].partNum = (*p)[i].partNum;
+					(*r)[count].data.ano = (*p)[i].data.ano; (*r)[count].data.mes = (*p)[i].data.mes; (*r)[count].data.dia = (*p)[i].data.dia;
+					(*r)[count].hora.hora = (*p)[i].hora.hora; (*r)[count].hora.minuto = (*p)[i].hora.minuto;
+					(*r)[count].duration = (*p)[i].duration;
+					(*r)[count].distance = (*p)[i].distance;
+					(*r)[count].sport = (*p)[i].sport;
+					(*r)[count].uniMed = (*p)[i].uniMed;
+					count++;
+				}
+			}
+			else if ((*p)[i].data.ano == z.ano) {
+				if ((*p)[i].data.mes < z.mes) {
+					(*r)[count].partNum = (*p)[i].partNum;
+					(*r)[count].data.ano = (*p)[i].data.ano; (*r)[count].data.mes = (*p)[i].data.mes; (*r)[count].data.dia = (*p)[i].data.dia;
+					(*r)[count].hora.hora = (*p)[i].hora.hora; (*r)[count].hora.minuto = (*p)[i].hora.minuto;
+					(*r)[count].duration = (*p)[i].duration;
+					(*r)[count].distance = (*p)[i].distance;
+					(*r)[count].sport = (*p)[i].sport;
+					(*r)[count].uniMed = (*p)[i].uniMed;
+					count++;
+				}
+				else if ((*p)[i].data.mes == z.mes && (*p)[i].data.dia <= z.dia) {
+					(*r)[count].partNum = (*p)[i].partNum;
+					(*r)[count].data.ano = (*p)[i].data.ano; (*r)[count].data.mes = (*p)[i].data.mes; (*r)[count].data.dia = (*p)[i].data.dia;
+					(*r)[count].hora.hora = (*p)[i].hora.hora; (*r)[count].hora.minuto = (*p)[i].hora.minuto;
+					(*r)[count].duration = (*p)[i].duration;
+					(*r)[count].distance = (*p)[i].distance;
+					(*r)[count].sport = (*p)[i].sport;
+					(*r)[count].uniMed = (*p)[i].uniMed;
+					count++;
+				}
+			}
+		}
+	}
+}
+
+
+// Copia para a variável r (trainingPlan) os dados da variável p (trainingPlan) filtrados por data
+void dateRangeTrainingPlan(trainingPlan** p, trainingPlan** r) {
+	int i, count, pos = 0;
+	Date a, z;
+
+	printf("Introduza o periodo de tempo que deseja seguir esta atividade (AA/MM/DD) \n");
+	printf("Inicio \n");
+	printf("Ano: ");
+	scanf("%d", &a.ano);
+	printf("Mes: ");
+	scanf("%d", &a.mes);
+	while (a.mes < 1 || a.mes > 12) {
+		printf("Introduza um mes valido: ");
+		scanf("%d", &a.mes);
+	}
+	printf("Dia: ");
+	scanf("%d", &a.dia);
+	while (a.dia < 1 || a.dia > MAX_DAYS[a.mes - 1]) {
+		printf("Introduza um dia valido: ");
+		scanf("%d", &a.dia);
+	}
+
+	printf("Fim \n");
+	printf("Ano: ");
+	scanf("%d", &z.ano);
+	printf("Mes: ");
+	scanf("%d", &z.mes);
+	while (z.mes < 1 || z.mes > 12) {
+		printf("Introduza um mes valido: ");
+		scanf("%d", &z.mes);
+	}
+	printf("Dia: ");
+	scanf("%d", &z.dia);
+	while (z.dia < 1 || z.dia > MAX_DAYS[z.mes - 1]) {
+		printf("Introduza um dia valido: ");
+		scanf("%d", &z.dia);
+	}
+
+
+	for (i = 0; (*p)[i].partNum != 0; i++) {
+		count = 0;
+		if (((*p)[i].initDate.ano >= a.ano) && ((*p)[i].initDate.ano <= z.ano)) {
+			if (((*p)[i].initDate.ano > a.ano) && ((*p)[i].initDate.ano < z.ano)) {
+				count++;
+			}
+			else if ((*p)[i].initDate.ano == a.ano) {
+				if ((*p)[i].initDate.mes > a.mes) {
+					count++;
+				}
+				else if ((*p)[i].initDate.mes == a.mes && (*p)[i].initDate.dia >= a.dia) {
+					count++;
+				}
+			}
+			else if ((*p)[i].initDate.ano == z.ano) {
+				if ((*p)[i].initDate.mes < z.mes) {
+					count++;
+				}
+				else if ((*p)[i].initDate.mes == z.mes && (*p)[i].initDate.dia <= z.dia) {
+					count++;
+				}
+			}
+		}
+
+		if (((*p)[i].endDate.ano >= a.ano) && ((*p)[i].endDate.ano <= z.ano)) {
+			if (((*p)[i].endDate.ano > a.ano) && ((*p)[i].endDate.ano < z.ano)) {
+				count++;
+			}
+			else if ((*p)[i].endDate.ano == a.ano) {
+				if ((*p)[i].endDate.mes > a.mes) {
+					count++;
+				}
+				else if ((*p)[i].endDate.mes == a.mes && (*p)[i].endDate.mes >= a.dia) {
+					count++;
+				}
+			}
+			else if ((*p)[i].endDate.ano == z.ano) {
+				if ((*p)[i].endDate.mes < z.mes) {
+					count++;
+				}
+				else if ((*p)[i].endDate.mes == z.mes && (*p)[i].endDate.dia <= z.dia) {
+					count++;
+				}
+			}
+		}
+
+		if (count == 2) {
+			(*r)[pos].partNum = (*p)[i].partNum;
+			(*r)[pos].initDate.dia = (*p)[i].initDate.dia; (*r)[pos].initDate.mes = (*p)[i].initDate.mes; (*r)[pos].initDate.ano = (*p)[i].initDate.ano;
+			(*r)[pos].inittime.hora = (*p)[i].inittime.hora; (*r)[pos].inittime.minuto = (*p)[i].inittime.minuto;
+			(*r)[pos].endDate.dia = (*p)[i].endDate.dia; (*r)[pos].endDate.mes = (*p)[i].endDate.mes; (*r)[pos].endDate.ano = (*p)[i].endDate.ano;
+			(*r)[pos].endtime.hora = (*p)[i].endtime.hora; (*r)[pos].endtime.minuto = (*p)[i].endtime.minuto;
+			(*r)[pos].distance = (*p)[i].distance;
+			(*r)[pos].sport = (*p)[i].sport;
+			(*r)[pos].uniMed = (*p)[i].uniMed;
+			pos++;
+		}
+	}
+}
+
+
+// A funçao "pergunta4" apresenta o numero de praticantes que realizaram uma atividade num determinado periodo de tempo
+void pergunta4(trainingType** p) {
+	int i, cont = 0;
+
+	SportType x;
+
+
+	printSportType();
+	printf("Escolha a atividade que deseja seguir: ");
+	scanf("%d", &x);
+	while (x < marcha || x > swimming) {
+		printf("Indique uma Atividade valida: ");
+		scanf("%d", &x);
+	}
+
+	for (i = 0; (*p)[i].partNum != 0; i++) {
+		if ((*p)[i].sport == x)
+			cont++;
+	}
+
+	printf(" Durante o periodo de tempo indicado %d pessoas praticaram a atividade %s\n", cont, SPORT_NAME[x]);
+}
+
+
+// A funçao "pergunta5" lista os praticantes que realizaram alguma atividade num determinado periodo de tempo
+void pergunta5(trainingType** p) {
+	int i = 0, b = 1, j;
+	trainingType aux;
+
+	while ((*p)[i].partNum != 0) {
+		i++;
+	}
+	i--;
+
+	if (i < 0) {
+		printf("Nenhum praticante realizou qualquer atividade desportiva no intervalo de tempo indicado\n");
+	}
+	else {
+		while (b) {
+			b = 0;
+			for (j = 0; j < i; j++) {
+				if ((*p)[j].partNum > (*p)[j + 1].partNum) {
+					aux.partNum = (*p)[j].partNum;
+					aux.data.ano = (*p)[j].data.ano; aux.data.mes = (*p)[j].data.mes; aux.data.dia = (*p)[j].data.dia;
+					aux.hora.hora = (*p)[j].hora.hora; aux.hora.minuto = (*p)[j].hora.minuto;
+					aux.sport = (*p)[j].sport;
+					aux.duration = (*p)[j].duration;
+					aux.distance = (*p)[j].distance;
+					aux.uniMed = (*p)[j].uniMed;
+
+					(*p)[j].partNum = (*p)[j + 1].partNum;
+					(*p)[j].data.ano = (*p)[j + 1].data.ano;  (*p)[j].data.mes = (*p)[j + 1].data.mes; (*p)[j].data.dia = (*p)[j + 1].data.dia;
+					(*p)[j].hora.hora = (*p)[j + 1].hora.hora; (*p)[j].hora.minuto = (*p)[j + 1].hora.minuto;
+					(*p)[j].sport = (*p)[j + 1].sport;
+					(*p)[j].duration = (*p)[j + 1].duration;
+					(*p)[j].distance = (*p)[j + 1].distance;
+					(*p)[j].uniMed = (*p)[j + 1].uniMed;
+
+					(*p)[j + 1].partNum = aux.partNum;
+					(*p)[j + 1].data.ano = aux.data.ano;  (*p)[j + 1].data.mes = aux.data.mes; (*p)[j + 1].data.dia = aux.data.dia;
+					(*p)[j + 1].hora.hora = aux.hora.hora; (*p)[j + 1].hora.minuto = aux.hora.minuto;
+					(*p)[j + 1].sport = aux.sport;
+					(*p)[j + 1].duration = aux.duration;
+					(*p)[j + 1].distance = aux.distance;
+					(*p)[j + 1].uniMed = aux.uniMed;
+
+					b = 1;
+				}
+
+			}
+		}
+
+
+
+		while (i >= 0) {
+			printf("-----------------------------------\n");
+			printf("Numero Participante: %.4d \n", (*p)[i].partNum);
+			printf("Data: %d/%d/%d \n", (*p)[i].data.dia, (*p)[i].data.mes, (*p)[i].data.ano);
+			printf("Hora: %.2d:%.2d \n", (*p)[i].hora.hora, (*p)[i].hora.minuto);
+			printf("Tipo de atividade: %s \n", SPORT_NAME[(*p)[i].sport]);
+			printf("tempo de duraçao (min): %d \n", (*p)[i].duration);
+			printf("Distancia: %d \n", (*p)[i].distance);
+			printf("Unidade de medida: %s \n", UNI_MED[(*p)[i].uniMed]);
+			printf("-----------------------------------\n");
+			i--;
+		}
+	}
+}
+
+
+// A funçao "pergunta6" lista os planos de atividades de um praticante para um determinado periodo de tempo
+void pergunta6(pratData** c, trainingPlan** a) {
+	SportType x;
+	int num, i, count = 0;
+
+	printSportType();
+	printf("Escolha a atividade que deseja seguir: ");
+	scanf("%d", &x);
+	while (x < marcha || x > swimming) {
+		printf("Indique uma Atividade valida: ");
+		scanf("%d", &x);
+	}
+
+	printf("Digite o numero do praticante que deseja listar o plano de atividades: ");
+	scanf("%d", &num);
+	while (validarNum(&c, num) == 0) {
+		printf("Indique um numero de praticante valido: ");
+		scanf("%d", &num);
+	}
+
+	for (i = 0; (*a)[i].partNum != 0; i++) {
+		if (((*a)[i].partNum == num) && ((*a)[i].sport == x)) {
+			printf("-----------------------------------\n");
+			printf("Numero Participante: %.4d \n", (*a)[i].partNum);
+			printf("Data Inicio: %d/%d/%d \n", (*a)[i].initDate.dia, (*a)[i].initDate.mes, (*a)[i].initDate.ano);
+			printf("Hora inicio: %.2d:%.2d \n", (*a)[i].inittime.hora, (*a)[i].inittime.minuto);
+			printf("Data fim: %d/%d/%d \n", (*a)[i].endDate.dia, (*a)[i].endDate.mes, (*a)[i].endDate.ano);
+			printf("Hora fim: %.2d:%.2d \n", (*a)[i].endtime.hora, (*a)[i].endtime.minuto);
+			printf("Atividade: %s\n", SPORT_NAME[(*a)[i].sport]);
+			printf("Distancia: %d\n", (*a)[i].distance);
+			printf("Unidade de medida: %s \n", UNI_MED[(*a)[i].uniMed]);
+			printf("-----------------------------------\n");
+			count++;
+		}
+	}
+
+	if (count == 0)
+		printf("Nao existe nenhum plano que correspondas as suas condicoes");
+}
+
+
+// A funçao "pergunta7" calcula os tempos totais e médias por atividade em que cada praticante esteve envolvido num determinado período introduzido pelo utilizador
+void pergunta7(trainingType** p) {
+	int i, j, savenum;
+	calcMed y[MAX_PART];
+
+	startupCalcMed(&y);
+	//Calcular tempo total de cada atividade
+	for (i = 0; (*p)[i].partNum != 0; i++) {
+		j = 0;
+		savenum = -1;
+		while (y[j].partNum != 0) {
+			if (((*p)[i].partNum == y[j].partNum) && ((*p)[i].sport == y[j].sport)) {
+				savenum = j;
+				break;
+			}
+			j++;
+		}
+		if (savenum >= 0) {
+			y[savenum].iteracoes += 1;
+			y[savenum].totalTime += (*p)[i].duration;
+			y[savenum].med = y[savenum].totalTime / y[savenum].iteracoes;
+		}
+		else {
+			y[j].partNum = (*p)[i].partNum;
+			y[j].sport = (*p)[i].sport;
+			y[j].iteracoes += 1;
+			y[j].totalTime += (*p)[i].duration;
+			y[j].med = y[j].totalTime / y[j].iteracoes;
+		}
+	}
+
+
+	for (i = 0; y[i].partNum != 0; i++) {
+		printf("\n\n-----------------------\n");
+		printf("Numero de praticante: %.4d\n", y[i].partNum);
+		printf("Desporto praticado: %s\n", SPORT_NAME[y[i].sport]);
+		printf("Tempo total (min): %d\n", y[i].totalTime);
+		printf("Tempo medio (min): %.2f\n", y[i].med);
+		printf("-----------------------\n\n");
+	}
+}
 
 
 int main() {
-
 	pratData c[MAX_PART];
 	trainingType p[MAX_PART], z[MAX_PART];
 	trainingPlan t[MAX_PART], a[MAX_PART];
