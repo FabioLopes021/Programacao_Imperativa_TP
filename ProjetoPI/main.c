@@ -1504,12 +1504,305 @@ void pergunta11(pratData** c, seguidores** s, trainingType** p) {
 }
 
 
-int main() {
+char menu() {
+	char opcao;
 
-	pratData c[MAX_PART];
-	trainingType p[MAX_PART], z[MAX_PART];
-	trainingPlan t[MAX_PART], a[MAX_PART];
-	seguidores s[MAX_PART];
+	SetColor(11);
+	printf("\n -------------------------------- MENU ----------------------------------\n");
+	printf("| A - Adicionar (Praticantes, plano treino, tipo treino e seguidores)    |\n");
+	printf("| F - Funcionalidades                                                    |\n");
+	printf("| S - Sair                                                               |\n");
+	printf(" ------------------------------------------------------------------------\n");
+
+	// verificar opçao escolhida
+	do {
+		printf("Opcao: ");
+		scanf("%c", &opcao);
+		opcao = toupper(opcao);
+	} while (opcao != 'A' && opcao != 'F' && opcao != 'S');
+
+	while ((getchar()) != '\n');	// limpar buffer
+	SetColor(15);
+	return opcao;
+}
+
+
+int menuAdicionar() {
+	int opcao;
+
+	SetColor(11);
+	printf(" --------------------- MENU ADICIONAR ----------------------\n");
+	printf("| 1 - Adicionar Praticante                                  |\n");
+	printf("| 2 - Adicionar Plano de Treino                             |\n");
+	printf("| 3 - Adicionar Tipo de Treino                              |\n");
+	printf("| 4 - Seguir Praticante                                     |\n");
+	printf("| 5 - Print Praticante                                      |\n");
+	printf("| 6 - Print plano de treino                                 |\n");
+	printf("| 7 - Print tipo de treino                                  |\n");
+	printf("| 8 - Print seguidores                                      |\n");
+	printf("| 9 - Remover Seguidores                                    |\n");
+	printf("| 0 - Voltar ao menu Principal                              |\n");
+	printf(" -----------------------------------------------------------\n");
+
+
+	// verificar opçao escolhida
+	do {
+		printf("Opcao: ");
+		scanf("%d", &opcao);
+	} while (opcao < 0 || opcao > 9);
+
+	while ((getchar()) != '\n');	//limpar buffer
+	SetColor(15);
+	return opcao;
+}
+
+
+int menuFuncoes() {
+	int opcao;
+
+	SetColor(11);
+	printf(" ----------------------------------------------------------------- MENU ADICIONAR -----------------------------------------------------------------------------\n");
+	printf("| 1 - Apresentar o numero de Praticante que realizaram um determinado desporto num intervalo de tempo                                                           |\n");
+	printf("| 2 - Listar praticantes (ordem decrescente), que realizaram alguma atividade num intervalo de tempo                                                            |\n");
+	printf("| 3 - Apresentar plano de atividades de um tipo para um Utilizador num intervalo de tempo                                                                       |\n");
+	printf("| 4 - Calculo tempo total e media dos tempos por atividade que cada praticante esteve envolvido num intervalo de tempo                                          |\n");
+	printf("| 5 - Gerar tabela de atividades planeadas e atividades realizadas por os praticantes                                                                           |\n");
+	printf("| 6 - Apresentar uma listagem de todos os praticantes e seus seguidores                                                                                         |\n");
+	printf("| 7 - Apresentar uma listagem por atividade com o praticante com o maior tempo de pratica dessa atividade de entre os seguidores de um determinado praticante   |\n");
+	printf("| 8 - Apresentar uma listagem por atividade com o praticante com o maior tempo de pratica dessa atividade de entre os seguidos de um determinado praticante     |\n");
+	printf("| 0 - Voltar ao menu Principal                                                                                                                                  |\n");
+	printf(" ---------------------------------------------------------------------------------------------------------------------------------------------------------------\n");
+
+
+	// verificar opçao escolhida
+	do {
+		printf("Opcao: ");
+		scanf("%d", &opcao);
+	} while (opcao < 0 || opcao > 8);
+
+	while ((getchar()) != '\n');	//limpar buffer
+	SetColor(15);
+	return opcao;
+}
+
+
+/** Banner/Logotipo
+ * Funcao que desenha o logotipo da aplicacao em forma de banner
+ * Gerado em: http://www.patorjk.com/software/taag/#p=display&f=Small&t=EquipaGES
+ */
+void generico()
+{
+	system("cls");
+	SetColor(4);
+	printf("\n   _____            _       __   _______ __ \n");
+	printf("  / ___/____  _____(_)___ _/ /  / ____(_) /_\n");
+	printf("  \\__ \\/ __ \\/ ___/ / __ `/ /  / /_  / / __/\n");
+	printf(" ___/ / /_/ / /__/ / /_/ / /  / __/ / / /_  \n");
+	printf("/____/\\____/\\___/_/\\__,_/_/  /_/   /_/\\__/  \n");
+	printf("\nTrabalho realizado por Fabio Lopes, Ruben Araujo e Ruben Costa\n\n");
+	SetColor(11);
+}
+
+
+
+
+int main() {
+	char escolha, respostaSave;
+	int escolhaA, escolhaF;
+
+
+	pratData* c;
+	trainingType* p, * z;
+	trainingPlan* t, * a;
+	seguidores* s;
+
+	c = malloc(sizeof(pratData) * MAX_PART);		//alocar dinamicamente memoria (heap) e atribuir o endereço da memoria ao apontador 
+	p = malloc(sizeof(trainingType) * MAX_PART);	//alocar dinamicamente memoria (heap) e atribuir o endereço da memoria ao apontador
+	z = malloc(sizeof(trainingType) * MAX_PART);	//alocar dinamicamente memoria (heap) e atribuir o endereço da memoria ao apontador
+	t = malloc(sizeof(trainingPlan) * MAX_PART);	//alocar dinamicamente memoria (heap) e atribuir o endereço da memoria ao apontador
+	a = malloc(sizeof(trainingPlan) * MAX_PART);	//alocar dinamicamente memoria (heap) e atribuir o endereço da memoria ao apontador
+	s = malloc(sizeof(seguidores) * MAX_PART);		//alocar dinamicamente memoria (heap) e atribuir o endereço da memoria ao apontador
+
+
+	//inicializar todas as estruturas
+	startup(&c, &p, &t);	//inicializar os campos de todas as estruturas
+	startupTrainingType(&z);	//inicializar os campos apenas de uma estrutura 
+	startupSeguidores(&s); //inicializar os campos da struct seguidores
+
+	// ler dados dos ficheiros
+	readPartData(&c);		//ler dados do ficheiro para a variavel c (partData)
+	readTrainingType(&p);	//ler dados do ficheiro para a variavel p (trainingType)
+	readTrainingPlan(&t);	//ler dados do ficheiro para a variavel t (trainingPlan)
+	atualizarseguidores(&s, &c);	//Atribui aos seguidores a identidficaçao do numero de praticante
+	readSeguidores(&s);		//ler os dados do ficheiro que guarda os seguidores para a variaver s (Seguidores)
+
+	do
+	{
+		generico();		//banner
+		escolha = menu();	// toma o valor da resposta lida na funçao menu
+		switch (escolha)
+		{
+		case 'A':
+			do
+			{
+				generico();		//banner
+				escolhaA = menuAdicionar();		// toma o valor da resposta lida na funçao menuAdicionar
+				SetColor(11);					// Muda a cor da linha de comandos				
+				switch (escolhaA)
+				{
+				case 1: // Adicionar Praticante
+					generico();						//banner
+					addPratData(&c);				//adicionar praticante
+					atualizarseguidores(&s, &c);	//Atribuir o numero do praticante novo a lista seguidores
+					wEnter();						//Espera por um enter antes de avançar	
+					break;
+				case 2: //Adicionar Plano de Treino
+					generico();						//banner
+					printPartData(&c);				//Print aos dados de todos os praticantes (ajuda para o utilizador verificar o seu numero de praticante)
+					addTrainingPlan(&t, &c);		//Adicionar Plano de Treino
+					wEnter();						//Espera por um enter antes de avançar
+					break;
+				case 3: //Adicionar Tipo de treino
+					generico();						//banner
+					printPartData(&c);				//Print aos dados de todos os praticantes (ajuda para o utilizador verificar o seu numero de praticante)
+					addTrainingType(&p, &c);		//Adicionar tipo de treino
+					wEnter();						//Espera por um enter antes de avançar
+					break;
+				case 4: //Seguir Praticantes
+					generico();						//banner
+					printPartData(&c);				//Print aos dados de todos os praticantes
+					addNumSeguidores(&s);			//Seguir treinos de outros participantes
+					wEnter();						//Espera por um enter antes de avançar
+					break;
+				case 5: //imprimir praticantes
+					generico();						//banner
+					printPartData(&c);				//Print aos dados de todos os praticantes
+					wEnter();						//Espera por um enter antes de avançar
+					break;
+				case 6: //imprimir planos de treinos
+					generico();						//banner
+					printTrainingPlan(&t);			//Print aos dados de todos planos de treino
+					wEnter();						//Espera por um enter antes de avançar
+					break;
+				case 7: //imprimir tipo de treinos
+					generico();						//banner
+					printTrainingType(&p);			//Print aos dados de todos os treino
+					wEnter();						//Espera por um enter antes de avançar
+					break;
+				case 8: //Print Seguidores
+					generico();						//banner
+					printNumSeg(&s);				//Print aos dados de seguidores
+					wEnter();						//Espera por um enter antes de avançar
+					break;
+				case 9: //Deixar de seguir participantes
+					generico();						//banner
+					printPartData(&c);				//Print aos dados de todos os praticantes (ajuda para o utilizador verificar o seu numero de praticante)
+					rmvNumSeguidores(&s);			//Print aos dados de seguidores
+					wEnter();						//Espera por um enter antes de avançar
+					break;
+				}
+				wEnter();		//Espera por um enter antes de avançar
+			} while (escolhaA != 0);
+			break;
+		case 'F':
+			do
+			{
+				generico();					//banner
+				escolhaF = menuFuncoes();		// toma o valor da resposta lida na funçao menuFuncoes
+				SetColor(11);					// Muda a cor da linha de comandos	
+				switch (escolhaF)
+				{
+				case 1:// Apresentar o numero de Praticante que realizaram um determinado desporto num intervalo de tempo
+					generico();							//banner
+					startupTrainingType(&z);			//inicializar os campos apenas de uma estrutura
+					dateRangeTrainingType(&p, &z);		// Copia para a variável z (trainingType) os dados da variável p (trainingType) filtrados por data
+					pergunta4(&z);						// A funçao "pergunta4" apresenta o numero de praticantes que realizaram uma atividade num determinado periodo de tempo
+					wEnter();							//Espera por um enter antes de avançar
+					break;
+				case 2:// Listar praticantes (ordem decrescente), que realizaram alguma atividade num intervalo de tempo
+					generico();							//banner
+					startupTrainingType(&z);			//inicializar os campos apenas de uma estrutura
+					dateRangeTrainingType(&p, &z);		// Copia para a variável z (trainingType) os dados da variável p (trainingType) filtrados por data
+					pergunta5(&z);						//A funçao "pergunta5" lista os praticantes que realizaram alguma atividade num determinado periodo de tempo
+					wEnter();							//Espera por um enter antes de avançar
+					break;
+				case 3:// Apresentar plano de atividades de um tipo para um Utilizador num intervalo de tempo
+					generico();							//banner
+					startupTrainingPlan(&a);			//inicializar os campos apenas de uma estrutura
+					dateRangeTrainingPlan(&t, &a);		// Copia para a variável t (trainingPlan) os dados da variável a (trainingPlan) filtrados por data
+					pergunta6(&c, &a);					// A funçao "pergunta6" lista os planos de atividades de um praticante para um determinado periodo de tempo
+					wEnter();							//Espera por um enter antes de avançar
+					break;
+				case 4:// Calculo tempo total e media dos tempos por atividade que cada praticante esteve envolvido num intervalo de tempo
+					generico();							//banner
+					startupTrainingType(&z);			//inicializar os campos apenas de uma estrutura
+					dateRangeTrainingType(&p, &z);		// Copia para a variável z (trainingType) os dados da variável p (trainingType) filtrados por data
+					pergunta7(&z);						// A funçao "pergunta7" calcula os tempos totais e médias por atividade em que cada praticante esteve envolvido num determinado período introduzido pelo utilizador
+					wEnter();							//Espera por um enter antes de avançar
+					break;
+				case 5:// Gerar tabela de atividades planeadas e atividades realizadas por os praticantes
+					generico();							//banner
+					pergunta8(&p, &t, &c);				// A funçao "auxpergunta8" serve de auxilio a funçao "Pergunta8", a mesma edita os dados de dois arrays com os indices necessarios para imprimir a informaçao correta
+					wEnter();							//Espera por um enter antes de avançar
+					break;
+				case 6:// Apresentar uma listagem de todos os praticantes e seus seguidores
+					generico();							//banner
+					printNumSeg(&s);					//Print aos dados de seguidores
+					wEnter();							//Espera por um enter antes de avançar
+					break;
+				case 7:// Apresentar uma listagem por atividade com o praticante com o maior tempo de pratica dessa atividade de entre os seguidores de um determinado praticante
+					generico();							//banner
+					pergunta10(&c, &s, &p);				// A funçao "pergunta10" apresenta uma listagem por atividade com o praticante com o maior tempo de prática dessa atividade, e o respetivo tempo, de entre os seguidores de um praticante definido pelo utilizador
+					wEnter();							//Espera por um enter antes de avançar
+					break;
+				case 8:// Apresentar uma listagem por atividade com o praticante com o maior tempo de pratica dessa atividade de entre os seguidos de um determinado praticante
+					generico();							//banner
+					pergunta11(&c, &s, &p);				// A funçao "pergunta11" Apresenta uma listagem por atividade com o praticante com o maior tempo de prática dessa atividade, e o respetivo tempo, de entre os praticantes seguidos por um determinado praticantedefinido pelo utilizador
+					wEnter();							//Espera por um enter antes de avançar
+					break;
+				}
+				wEnter();		//Espera por um enter antes de avançar
+			} while (escolhaF != 0);
+			break;
+		case 'S':
+			do
+			{
+				SetColor(11);
+				printf("\n Quer guardar as alteracoes efetuadas (S/N)? ");
+				scanf(" %c", &respostaSave);
+				respostaSave = toupper(respostaSave);
+			} while (respostaSave != 'S' && respostaSave != 'N');
+			while ((getchar()) != '\n');	//limpar buffer
+			if (respostaSave == 'S')
+			{
+				printf("A guardar as alteracoes em ficheiro...\n");
+				savePartData(&c);
+				saveTrainingType(&p);
+				saveTrainingPlan(&t);
+				saveSeguidores(&s);
+				free(c);
+				free(p);
+				free(z);
+				free(t);
+				free(a);
+				free(s);
+			}
+			else {
+				free(c);
+				free(p);
+				free(z);
+				free(t);
+				free(a);
+				free(s);
+			}
+			printf("Obrigado por utilizar o nosso programa.\n");
+			Beep(200, 500);
+			break;
+		}
+		SetColor(11);
+		wEnter();
+		SetColor(15);
+	} while (escolha != 'S');
 
 	return 0;
 }
