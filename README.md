@@ -1,4 +1,4 @@
-# Projecto Programação Imperativa (TP05 Laboratórios de Informática)
+# Projecto Programação Imperativa
 
 Este projecto foi realizado pelos alunos:
 - a25999 - Fábio Lopes
